@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<meta charset="utf-8"/>
+	<script src="https://js.lisk.com/lisk-client-5.2.1.js"></script>
+	<head>
+		<title>さんぷる</title>
+		<script>
+			BigInt.prototype.toJSON = function(){return this.toString()};
+			let client;
+			
+			const findAccount = async() => {
+				try {
+					<!-- get data -->
+					if (!client) client = await lisk.apiClient.createWSClient("wss://testnet-service.liskcommulab.jp/ws");
+					const address = document.querySelector("#input-address").value;
+					const hexAddress = lisk.cryptography.getAddressFromLisk32Address(address);
+					const account = await client.account.get(hexAddress);
+					
+					<!-- set data -->
+					document.querySelector("#address-base32").innerHTML = address;
+					document.querySelector("#address-hex").innerHTML = lisk.cryptography.bufferToHex(hexAddress);
+					document.querySelector("#username").innerHTML = account.dpos.delegate.username;
+					document.querySelector("#balance").innerHTML = `${lisk.transactions.convertBeddowsToLSK(account.token.balance.toString())} LSK`;
+					document.querySelector("#result").innerHTML = JSON.stringify(account, null, 2);
+					
+				} catch(err) {
+					alert(err);
+					client = null;
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div>
+			<input type="text" value="lsktj542p3cnuqp4uspyyh3xvjazccofzqgnvdmak" placeholder="enter your address" id="input-address" style="width: 500px; padding: 5px; font-size: 18px;"/>
+			<button onClick="findAccount()" style="width: 70px; padding: 5px;"/>検索</button>
+		</div>
+		<br>
+		<div style="font-weight: bold;">address(base32)</div>
+		<div id="address-base32" style="color: #666; margin: 3px 0px 10px 10px;"></div>
+		<div style="font-weight: bold;">address(hex):</div>
+		<div id="address-hex" style="color: #666; margin: 3px 0px 10px 10px;"></div>
+		<div style="font-weight: bold;">username:</div>
+		<div id="username" style="color: #666; margin: 3px 0px 10px 10px;"></div>
+		<div style="font-weight: bold;">balance:</div>
+		<div id="balance" style="color: #666; margin: 3px 0px 10px 10px;"></div>
+		<div style="font-weight: bold;">result:</div>
+		<pre id="result" style="color: #666; margin: 3px 0px 10px 10px;"></pre>
+	</body>
+</html>
